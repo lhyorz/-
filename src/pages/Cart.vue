@@ -158,7 +158,7 @@ export default {
     components: {
         NavHeader,
         NavFooter,
-        Modal
+        Modal,
     },
     mounted () {
       this.init(); // 初始化购物车列表
@@ -182,6 +182,9 @@ export default {
         if (type=='add'){
           item.productNum++;
         } else if(type=='minus'){
+          if (item.productNum <= 1){
+            return 
+          }
           item.productNum--;
         } else{
           item.checked = !item.checked;
