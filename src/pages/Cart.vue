@@ -69,7 +69,7 @@
               <li v-for="item in cartList" :key="item.productId">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn checked" :class="{'checked':item.checked}">
+                    <a href="javascipt:;" class="checkbox-btn item-check-btn" :class="{'check':item.checked}" @click="editCart('checked', item)">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok" />
                       </svg>
@@ -116,8 +116,8 @@
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
               <div class="item-all-check">
-                <a href="javascipt:;">
-                  <span class="checkbox-btn item-check-btn check">
+                <a href="javascipt:;" @click="toggleCheckAll">
+                  <span class="checkbox-btn item-check-btn" :class="{'check': checkAllFlag}">
                     <svg class="icon icon-ok">
                       <use xlink:href="#icon-ok" />
                     </svg>
@@ -129,10 +129,10 @@
             <div class="cart-foot-r">
               <div class="item-total">
                 总价:
-                <span class="total-price">￥89.00元</span>
+                <span class="total-price">{{ totalPrice | currency}}</span>
               </div>
               <div class="btn-wrap">
-                <a class="btn btn--red btn--dis">结算</a>
+                <a class="btn btn--red" :class="{'btn--dis': checkedCount == 0}" @click="checkOut">结算</a>
               </div>
             </div>
           </div>
@@ -147,7 +147,7 @@
       </template>
       <template v-slot:btnGroup>
         <a class="btn btn--m" href="javascript:;" @click="delCart">确认</a>
-        <a class="btn btn--m btn--red" href="javascript:;">关闭</a>
+        <a class="btn btn--m btn--red" href="javascript:;" @click="modalConfirm=false">关闭</a>
       </template>
     </modal>
   </div>
@@ -171,6 +171,30 @@ export default {
         NavHeader,
         NavFooter,
         Modal,
+    },
+    computed:{
+      // 全选 反选
+      checkAllFlag(){
+        return this.cartList.every((item)=>{
+          return item.checked;
+        })
+      },
+      // 结算
+      checkedCount(){
+        return this.cartList.some((item)=>{
+          return item.checked;
+        })
+      },
+      // 计算总金额
+      totalPrice(){
+        let money = 0;
+        this.cartList.forEach((item)=>{
+          if(item.checked){
+            money += item.productNum*item.productPrice;
+          }
+        })
+        return money
+      }
     },
     mounted () {
       this.init(); // 初始化购物车列表
@@ -219,6 +243,20 @@ export default {
             this.modalConfirm = false;
           }
         })
+      },
+      // 全选和反选
+      toggleCheckAll(){
+        var flag = !this.checkAllFlag;
+        this.cartList.forEach((item)=>{
+          item.checked = flag?true:false;
+        })
+      },
+      checkOut(){
+        if(this.checkedCount>0){
+          this.$router.push({
+            path: '/address'
+          });
+        }
       }
     }
 }

@@ -81,11 +81,11 @@
           <div class="addr-list-wrap">
             <div class="addr-list">
               <ul>
-                <li class="check">
+                <li :class="{'check': checkedIndex == index }" v-for="(item, index) in addressFilter" :key="item" @click="checkedIndex=index">
                   <dl>
-                    <dt>河畔一角</dt>
-                    <dd class="address">北京市昌平区</dd>
-                    <dd class="tel">17600000000</dd>
+                    <dt>{{item.userName}}</dt>
+                    <dd class="address">{{item.streetName}}</dd>
+                    <dd class="tel">{{item.tel}}</dd>
                   </dl>
                   <div class="addr-opration addr-del">
                     <!-- 删除地址 -->
@@ -117,7 +117,7 @@
             </div>
 
             <div class="shipping-addr-more">
-              <a class="addr-more-btn up-down-btn open" href="javascript:;">
+              <a class="addr-more-btn up-down-btn" href="javascript:;" @click="expand" :class="{'open': limit>3}">
                 查看更多
                 <i class="i-up-down">
                   <i class="i-up-down-l"></i>
@@ -152,6 +152,7 @@
         </div>
       </div>
     </div>
+    <modal></modal>
     <nav-footer></nav-footer>
   </div>
 </template>
@@ -163,12 +164,44 @@ import Modal from "./../components/Modal";
 export default {
   name: "addr",
   data() {
-    return {};
+    return {
+      addressList: [],
+      limit: 3,
+      checkedIndex: 0
+    }
   },
   components: {
     NavHeader,
     NavFooter,
-    Modal
+    Modal,
+  },
+  computed:{
+    addressFilter(){
+      return this.addressList.slice(0, this.limit);
+    }
+  },
+  mounted(){
+    this.init()
+  }, 
+  methods:{
+    init(){
+      this.axios.get('mock/address.json').then((respone)=>{
+        let res = respone.data;
+        this.addressList = res.data;
+        res.data.forEach((item, index) => {
+          if(item.isDefault){
+            this.checkedIndex = index;
+          }
+        });
+      })
+    },
+    expand(){
+      if(this.limit==3){
+        this.limit = this.addressList.length;
+      }else{
+        this.limit = 3;
+      }
+    }
   }
 };
 </script>
